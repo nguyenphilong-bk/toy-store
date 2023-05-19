@@ -31,13 +31,13 @@ func (ctrl UserController) Login(c *gin.Context) {
 		return
 	}
 
-	user, token, err := userModel.Login(loginForm)
+	_, token, err := userModel.Login(loginForm)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": "Invalid login details"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged in", "user": user, "token": token})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged in", "data": token})
 }
 
 //Register ...
@@ -56,7 +56,7 @@ func (ctrl UserController) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully registered", "user": user})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully registered", "data": user})
 }
 
 //Logout ...
@@ -74,5 +74,5 @@ func (ctrl UserController) Logout(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out", "data": nil})
 }

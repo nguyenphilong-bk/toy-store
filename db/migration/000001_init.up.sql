@@ -1,20 +1,21 @@
 CREATE TABLE "users" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     name VARCHAR,
     email VARCHAR NOT NULL,
     address VARCHAR,
     birthday DATE,
     phone VARCHAR NOT NULL,
+password VARCHAR NOT NULL,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE "orders" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     shipping_fee FLOAT,
     total FLOAT,
@@ -26,8 +27,8 @@ CREATE TABLE "orders" (
 
 CREATE TABLE "brands" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     name VARCHAR,
     PRIMARY KEY(id)
@@ -35,8 +36,8 @@ CREATE TABLE "brands" (
 
 CREATE TABLE "categories" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     name VARCHAR,
     description VARCHAR,
@@ -45,8 +46,8 @@ CREATE TABLE "categories" (
 
 CREATE TABLE "products" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     name VARCHAR,
     origin VARCHAR,
@@ -59,8 +60,8 @@ CREATE TABLE "products" (
 
 CREATE TABLE "product_categories" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     product_id uuid not null,
     category_id uuid not null,
@@ -70,8 +71,8 @@ CREATE TABLE "product_categories" (
 
 CREATE TABLE "product_brands" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     product_id uuid not null,
     brand_id uuid not null,
@@ -81,8 +82,8 @@ CREATE TABLE "product_brands" (
 
 CREATE TABLE "product_orders" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     product_id uuid not null,
     order_id uuid not null,
@@ -92,8 +93,8 @@ CREATE TABLE "product_orders" (
 
 CREATE TABLE "carts" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     total FLOAT,
     user_id uuid NOT NULL,
@@ -103,8 +104,8 @@ CREATE TABLE "carts" (
 
 CREATE TABLE "cart_products" (
     id uuid DEFAULT gen_random_uuid(),
-    created_at DATE DEFAULT CURRENT_DATE,
-    updated_at DATE DEFAULT CURRENT_DATE,
+created_at DATE DEFAULT CURRENT_TIMESTAMP,
+updated_at DATE DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATE,
     cart_id uuid NOT NULL,
     product_id uuid NOT NULL,

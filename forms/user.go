@@ -20,6 +20,7 @@ type RegisterForm struct {
 	Name     string `form:"name" json:"name" binding:"required,min=3,max=20,fullName"` //fullName rule is in validator.go
 	Email    string `form:"email" json:"email" binding:"required,email"`
 	Password string `form:"password" json:"password" binding:"required,min=3,max=50"`
+	Phone string `form:"phone" json:"phone" binding:"required,min=10,max=10"`
 }
 
 //Name ...
@@ -63,6 +64,17 @@ func (f UserForm) Password(tag string) (message string) {
 		return "Your password should be between 3 and 50 characters"
 	case "eqfield":
 		return "Your passwords does not match"
+	default:
+		return "Something went wrong, please try again later"
+	}
+}
+
+func (f UserForm) Phone(tag string) (message string) {
+	switch tag {
+	case "required":
+		return "Please enter your phone number"
+	case "min", "max":
+		return "Your phone number must have 10 characters"
 	default:
 		return "Something went wrong, please try again later"
 	}
@@ -115,6 +127,9 @@ func (f UserForm) Register(err error) string {
 				return f.Password(err.Tag())
 			}
 
+			if err.Field() == "Phone" {
+				return f.Phone(err.Tag())
+			}
 		}
 	default:
 		return "Invalid request"

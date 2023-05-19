@@ -554,7 +554,7 @@ func TestUserLogout(t *testing.T) {
  */
 func TestCleanUp(t *testing.T) {
 	var err error
-	_, err = db.GetDB().Exec("DELETE FROM public.user WHERE email=$1", testEmail)
+	_, err = db.GetDB().Exec("DELETE FROM public.users WHERE email=$1", testEmail)
 	if err != nil {
 		t.Error(err)
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/Massad/gin-boilerplate/models"
@@ -74,35 +73,35 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
 			return
 		}
-		userID, err := strconv.ParseInt(fmt.Sprintf("%.f", claims["user_id"]), 10, 64)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
-			return
-		}
+		userID := claims["user_id"]
+		// if err != nil {
+		// 	c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
+		// 	return
+		// }
 		//Delete the previous Refresh Token
-		deleted, delErr := authModel.DeleteAuth(refreshUUID)
-		if delErr != nil || deleted == 0 { //if any goes wrong
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
-			return
-		}
+		_, _ = authModel.DeleteAuth(refreshUUID)
+		// if delErr != nil || deleted == 0 { //if any goes wrong
+		// 	c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
+		// 	return
+		// }
 
 		//Create new pairs of refresh and access tokens
-		ts, createErr := authModel.CreateToken(userID)
+		ts, createErr := authModel.CreateToken(userID.(string))
 		if createErr != nil {
 			c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization, please login again"})
 			return
 		}
 		//save the tokens metadata to redis
-		saveErr := authModel.CreateAuth(userID, ts)
-		if saveErr != nil {
-			c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization, please login again"})
-			return
-		}
+		// saveErr := authModel.CreateAuth(userID.(string), ts)
+		// if saveErr != nil {
+		// 	c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization, please login again"})
+		// 	return
+		// }
 		tokens := map[string]string{
 			"access_token":  ts.AccessToken,
 			"refresh_token": ts.RefreshToken,
 		}
-		c.JSON(http.StatusOK, tokens)
+		c.JSON(http.StatusOK, gin.H{"message": "Refreshed token successfully", "data": tokens})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
 	}

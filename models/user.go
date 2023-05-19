@@ -2,32 +2,36 @@ package models
 
 import (
 	"errors"
+	"time"
 
 	"github.com/Massad/gin-boilerplate/db"
 	"github.com/Massad/gin-boilerplate/forms"
+	"github.com/google/uuid"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-//User ...
+// User ...
 type User struct {
-	ID        int64  `db:"id, primarykey, autoincrement" json:"id"`
-	Email     string `db:"email" json:"email"`
-	Password  string `db:"password" json:"-"`
-	Name      string `db:"name" json:"name"`
-	UpdatedAt int64  `db:"updated_at" json:"-"`
-	CreatedAt int64  `db:"created_at" json:"-"`
+	ID        uuid.UUID `db:"id, primarykey" json:"id"`
+	Email     string    `db:"email" json:"email"`
+	Password  string    `db:"password" json:"-"`
+	Name      string    `db:"name" json:"name"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	Phone     string    `db:"phone" json:"phone"`
+	Birthday  string    `db:"birthday" json:"birthday"`
 }
 
-//UserModel ...
+// UserModel ...
 type UserModel struct{}
 
 var authModel = new(AuthModel)
 
-//Login ...
+// Login ...
 func (m UserModel) Login(form forms.LoginForm) (user User, token Token, err error) {
 
-	err = db.GetDB().SelectOne(&user, "SELECT id, email, password, name, updated_at, created_at FROM public.user WHERE email=LOWER($1) LIMIT 1", form.Email)
+	err = db.GetDB().SelectOne(&user, "SELECT id, email, password, name, updated_at, created_at FROM public.users WHERE email=LOWER($1) LIMIT 1", form.Email)
 
 	if err != nil {
 		return user, token, err
@@ -44,26 +48,26 @@ func (m UserModel) Login(form forms.LoginForm) (user User, token Token, err erro
 	}
 
 	//Generate the JWT auth token
-	tokenDetails, err := authModel.CreateToken(user.ID)
+	tokenDetails, err := authModel.CreateToken(user.ID.String())
 	if err != nil {
 		return user, token, err
 	}
 
-	saveErr := authModel.CreateAuth(user.ID, tokenDetails)
-	if saveErr == nil {
+	// saveErr := authModel.CreateAuth(user.ID.String(), tokenDetails)
+	// if saveErr == nil {
 		token.AccessToken = tokenDetails.AccessToken
 		token.RefreshToken = tokenDetails.RefreshToken
-	}
+	// }
 
 	return user, token, nil
 }
 
-//Register ...
+// Register ...
 func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 	getDb := db.GetDB()
 
 	//Check if the user exists in database
-	checkUser, err := getDb.SelectInt("SELECT count(id) FROM public.user WHERE email=LOWER($1) LIMIT 1", form.Email)
+	checkUser, err := getDb.SelectInt("SELECT count(id) FROM public.users WHERE email=LOWER($1) LIMIT 1", form.Email)
 	if err != nil {
 		return user, errors.New("something went wrong, please try again later")
 	}
@@ -79,19 +83,20 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 	}
 
 	//Create the user and return back the user ID
-	err = getDb.QueryRow("INSERT INTO public.user(email, password, name) VALUES($1, $2, $3) RETURNING id", form.Email, string(hashedPassword), form.Name).Scan(&user.ID)
+	err = getDb.QueryRow("INSERT INTO public.users(email, password, name, phone) VALUES($1, $2, $3, $4) RETURNING id ", form.Email, string(hashedPassword), form.Name, form.Phone).Scan(&user.ID)
 	if err != nil {
 		return user, errors.New("something went wrong, please try again later")
 	}
 
 	user.Name = form.Name
 	user.Email = form.Email
+	user.Phone = form.Phone
 
 	return user, err
 }
 
-//One ...
+// One ...
 func (m UserModel) One(userID int64) (user User, err error) {
-	err = db.GetDB().SelectOne(&user, "SELECT id, email, name FROM public.user WHERE id=$1 LIMIT 1", userID)
+	err = db.GetDB().SelectOne(&user, "SELECT id, email, name FROM public.users WHERE id=$1 LIMIT 1", userID)
 	return user, err
 }
