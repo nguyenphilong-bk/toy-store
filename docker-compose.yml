@@ -11,3 +11,13 @@ services:
       POSTGRES_USER: postgres
     ports:
       - 5432:5432
+  
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+      - .env
+    ports:
+      - 9000:9000
+    restart: always
