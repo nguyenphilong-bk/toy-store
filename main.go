@@ -86,7 +86,7 @@ func main() {
 
 	//Start Redis on database 1 - it's used to store the JWT but you can use it for anythig else
 	//Example: db.GetRedis().Set(KEY, VALUE, at.Sub(now)).Err()
-	db.InitRedis(1)
+	// db.InitRedis(1)
 
 	v1 := r.Group("/v1")
 	{
@@ -103,6 +103,7 @@ func main() {
 		//Refresh the token when needed to generate new access_token and refresh_token for the user
 		v1.POST("/token/refresh", auth.Refresh)
 
+		// Brand APIs
 		brand := new(controllers.BrandController)
 
 		v1.POST("/brand", TokenAuthMiddleware(), brand.Create)
@@ -110,6 +111,15 @@ func main() {
 		v1.GET("/brand/:id", TokenAuthMiddleware(), brand.One)
 		v1.PUT("/brand/:id", TokenAuthMiddleware(), brand.Update)
 		v1.DELETE("/brand/:id", TokenAuthMiddleware(), brand.Delete)
+
+		// Category APIs
+		category := new(controllers.CategoryController)
+
+		v1.POST("/category", TokenAuthMiddleware(), category.Create)
+		v1.GET("/categories", TokenAuthMiddleware(), category.All)
+		v1.GET("/category/:id", TokenAuthMiddleware(), category.One)
+		v1.PUT("/category/:id", TokenAuthMiddleware(), category.Update)
+		v1.DELETE("/category/:id", TokenAuthMiddleware(), category.Delete)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")
