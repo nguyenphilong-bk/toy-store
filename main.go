@@ -120,6 +120,15 @@ func main() {
 		v1.GET("/category/:id", TokenAuthMiddleware(), category.One)
 		v1.PUT("/category/:id", TokenAuthMiddleware(), category.Update)
 		v1.DELETE("/category/:id", TokenAuthMiddleware(), category.Delete)
+
+		// Category APIs
+		product := new(controllers.ProductController)
+
+		v1.POST("/product", TokenAuthMiddleware(), product.Create)
+		v1.GET("/products", TokenAuthMiddleware(), product.All)
+		v1.GET("/product/:id", TokenAuthMiddleware(), product.One)
+		v1.PUT("/product/:id", TokenAuthMiddleware(), product.Update)
+		v1.DELETE("/product/:id", TokenAuthMiddleware(), product.Delete)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")
