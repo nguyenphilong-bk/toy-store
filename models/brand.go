@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"errors"
 
 	"github.com/Massad/gin-boilerplate/db"
 	"github.com/Massad/gin-boilerplate/forms"
@@ -26,19 +25,28 @@ type BrandModel struct{}
 
 // Create ...
 func (m BrandModel) Create(form forms.CreateBrandForm) (articleID uuid.UUID, err error) {
-	err = db.GetDB().QueryRow("INSERT INTO public.brands(name) VALUES($1) RETURNING id", form.Name).Scan(&articleID)
+	err = db.GetDB().Raw("INSERT INTO public.brands(name) VALUES($1) RETURNING id", form.Name).Scan(&articleID).Error
 	return articleID, err
 }
 
 // One ...
 func (m BrandModel) One(id string) (brand Brand, err error) {
-	err = db.GetDB().SelectOne(&brand, "SELECT * FROM public.brands as b WHERE b.id=$1 AND deleted_at IS NULL LIMIT 1", id)
+	err = db.GetDB().Raw("SELECT * FROM public.brands as b WHERE b.id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&brand).Error
 	return brand, err
 }
 
 // All ...
 func (m BrandModel) All() (brands []Brand, err error) {
-	_, err = db.GetDB().Select(&brands, "SELECT * FROM public.brands where deleted_at is null")
+	rows, err := db.GetDB().Raw("SELECT * FROM public.brands where deleted_at is null").Rows()
+	defer rows.Close()
+
+	for rows.Next() {
+		// ScanRows scan a row into user
+		var brand Brand
+		db.GetDB().ScanRows(rows, &brand)
+		brands = append(brands, brand)
+		// do something
+	}
 	return brands, err
 }
 
@@ -51,31 +59,16 @@ func (m BrandModel) Update(id string, form forms.CreateBrandForm) (err error) {
 	// 	return err
 	// }
 
-	operation, err := db.GetDB().Exec("UPDATE public.brands SET name=$2 WHERE id=$1", id, form.Name)
-	if err != nil {
-		return err
-	}
-
-	success, _ := operation.RowsAffected()
-
-	if success == 0 {
-		return errors.New("updated 0 records")
-	}
+	err = db.GetDB().Raw("UPDATE public.brands SET name=? WHERE id=?", form.Name, id).Error
 
 	return err
 }
 
 // Delete ...
 func (m BrandModel) Delete(id string) (err error) {
-
-	operation, err := db.GetDB().Exec("UPDATE public.brands SET deleted_at = CURRENT_TIMESTAMP where id=$1", id)
+	err = db.GetDB().Raw("UPDATE public.brands SET deleted_at = CURRENT_TIMESTAMP where id=$1", id).Error
 	if err != nil {
 		return err
-	}
-
-	success, _ := operation.RowsAffected()
-	if success == 0 {
-		return errors.New("no records were deleted")
 	}
 
 	return err

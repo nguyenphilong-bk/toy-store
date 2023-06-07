@@ -1,8 +1,6 @@
 package models
 
 import (
-	"errors"
-
 	"github.com/Massad/gin-boilerplate/db"
 	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/google/uuid"
@@ -20,19 +18,29 @@ type CategoryModel struct{}
 
 // Create ...
 func (m CategoryModel) Create(form forms.CreateCategoryForm) (id uuid.UUID, err error) {
-	err = db.GetDB().QueryRow("INSERT INTO public.categories(name, description) VALUES($1, $2) RETURNING id", form.Name, form.Description).Scan(&id)
-	return id, err
+	var idString string
+	err = db.GetDB().Raw("INSERT INTO public.categories(name, description) VALUES(?, ?) RETURNING id", form.Name, form.Description).Scan(&idString).Error
+	return uuid.MustParse(idString), err
 }
 
 // One ...
 func (m CategoryModel) One(id string) (category Category, err error) {
-	err = db.GetDB().SelectOne(&category, "SELECT * FROM public.categories as b WHERE b.id=$1 AND deleted_at IS NULL LIMIT 1", id)
+	err = db.GetDB().Raw("SELECT * FROM public.categories as b WHERE b.id=$1 AND deleted_at IS NULL LIMIT 1", id).Scan(&category).Error
 	return category, err
 }
 
 // All ...
 func (m CategoryModel) All() (categories []Category, err error) {
-	_, err = db.GetDB().Select(&categories, "SELECT * FROM public.categories where deleted_at is null")
+	rows, err := db.GetDB().Select(&categories, "SELECT * FROM public.categories where deleted_at is null").Rows()
+	defer rows.Close()
+
+	for rows.Next() {
+		var category Category
+
+		db.GetDB().ScanRows(rows, &category)
+		categories = append(categories, category)
+	}
+
 	return categories, err
 }
 
@@ -45,15 +53,9 @@ func (m CategoryModel) Update(id string, form forms.CreateCategoryForm) (err err
 	// 	return err
 	// }
 
-	operation, err := db.GetDB().Exec("UPDATE public.categories SET name=$2, description=$3 WHERE id=$1", id, form.Name, form.Description)
+	err = db.GetDB().Exec("UPDATE public.categories SET name=?, description=? WHERE id=?", id, form.Name, form.Description).Error
 	if err != nil {
 		return err
-	}
-
-	success, _ := operation.RowsAffected()
-
-	if success == 0 {
-		return errors.New("updated 0 records")
 	}
 
 	return err
@@ -62,14 +64,9 @@ func (m CategoryModel) Update(id string, form forms.CreateCategoryForm) (err err
 // Delete ...
 func (m CategoryModel) Delete(id string) (err error) {
 
-	operation, err := db.GetDB().Exec("UPDATE public.categories SET deleted_at = CURRENT_TIMESTAMP where id=$1", id)
+	err = db.GetDB().Exec("UPDATE public.categories SET deleted_at = CURRENT_TIMESTAMP where id=?", id).Error
 	if err != nil {
 		return err
-	}
-
-	success, _ := operation.RowsAffected()
-	if success == 0 {
-		return errors.New("no records were deleted")
 	}
 
 	return err
