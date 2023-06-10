@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"github.com/Massad/gin-boilerplate/common"
-	"github.com/Massad/gin-boilerplate/forms"
-	"github.com/Massad/gin-boilerplate/models"
+	"toy-store/common"
+	"toy-store/forms"
+	"toy-store/models"
 	"github.com/google/uuid"
 
 	"net/http"

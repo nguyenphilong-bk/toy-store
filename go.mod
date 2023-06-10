@@ -1,4 +1,4 @@
-module github.com/Massad/gin-boilerplate
+module toy-store
 
 go 1.14
 

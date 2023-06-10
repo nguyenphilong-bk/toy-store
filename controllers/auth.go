@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Massad/gin-boilerplate/common"
-	"github.com/Massad/gin-boilerplate/forms"
-	"github.com/Massad/gin-boilerplate/models"
+	"toy-store/common"
+	"toy-store/forms"
+	"toy-store/models"
+
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v4"
 )

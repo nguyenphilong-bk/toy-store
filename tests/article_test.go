@@ -15,9 +15,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Massad/gin-boilerplate/controllers"
-	"github.com/Massad/gin-boilerplate/db"
-	"github.com/Massad/gin-boilerplate/forms"
+	"toy-store/controllers"
+	"toy-store/db"
+	"toy-store/forms"
 	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"

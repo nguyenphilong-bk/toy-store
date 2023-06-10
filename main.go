@@ -7,9 +7,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/Massad/gin-boilerplate/controllers"
-	"github.com/Massad/gin-boilerplate/db"
-	"github.com/Massad/gin-boilerplate/forms"
+	"toy-store/controllers"
+	"toy-store/db"
+	"toy-store/forms"
+
 	"github.com/gin-contrib/gzip"
 	uuid "github.com/google/uuid"
 	"github.com/joho/godotenv"
