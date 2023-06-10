@@ -1,5 +1,5 @@
 up:
-	docker-compose up -d --force-recreate --remove-orphans
+	docker-compose up -d --force-recreate --remove-orphans --build
 
 ps:
 	docker-compose ps
