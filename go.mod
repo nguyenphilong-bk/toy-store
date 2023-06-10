@@ -14,7 +14,7 @@ require (
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/lib/pq v1.5.2
 	github.com/mattn/go-isatty v0.0.13 // indirect
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/ugorji/go v1.2.6 // indirect
 	golang.org/x/crypto v0.9.0
 	google.golang.org/protobuf v1.27.1 // indirect
