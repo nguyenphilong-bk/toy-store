@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/Massad/gin-boilerplate/db"
 	"github.com/Massad/gin-boilerplate/forms"
@@ -25,13 +26,19 @@ type BrandModel struct{}
 
 // Create ...
 func (m BrandModel) Create(form forms.CreateBrandForm) (articleID uuid.UUID, err error) {
-	err = db.GetDB().Raw("INSERT INTO public.brands(name) VALUES($1) RETURNING id", form.Name).Scan(&articleID).Error
-	return articleID, err
+	var idString string
+	err = db.GetDB().Raw("INSERT INTO public.brands(name) VALUES($1) RETURNING id", form.Name).Scan(&idString).Error
+	return uuid.MustParse(idString), err
 }
 
 // One ...
 func (m BrandModel) One(id string) (brand Brand, err error) {
 	err = db.GetDB().Raw("SELECT * FROM public.brands as b WHERE b.id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&brand).Error
+
+	if brand.ID == uuid.Nil {
+		return brand, errors.New("not found")
+	}
+
 	return brand, err
 }
 
@@ -59,14 +66,14 @@ func (m BrandModel) Update(id string, form forms.CreateBrandForm) (err error) {
 	// 	return err
 	// }
 
-	err = db.GetDB().Raw("UPDATE public.brands SET name=? WHERE id=?", form.Name, id).Error
+	err = db.GetDB().Exec("UPDATE public.brands SET name=? WHERE id=?", form.Name, id).Error
 
 	return err
 }
 
 // Delete ...
 func (m BrandModel) Delete(id string) (err error) {
-	err = db.GetDB().Raw("UPDATE public.brands SET deleted_at = CURRENT_TIMESTAMP where id=$1", id).Error
+	err = db.GetDB().Exec("UPDATE public.brands SET deleted_at = CURRENT_TIMESTAMP where id=?", id).Error
 	if err != nil {
 		return err
 	}

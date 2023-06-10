@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/Massad/gin-boilerplate/db"
 	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/google/uuid"
@@ -19,13 +21,20 @@ type CategoryModel struct{}
 // Create ...
 func (m CategoryModel) Create(form forms.CreateCategoryForm) (id uuid.UUID, err error) {
 	var idString string
+
 	err = db.GetDB().Raw("INSERT INTO public.categories(name, description) VALUES(?, ?) RETURNING id", form.Name, form.Description).Scan(&idString).Error
+
 	return uuid.MustParse(idString), err
 }
 
 // One ...
 func (m CategoryModel) One(id string) (category Category, err error) {
-	err = db.GetDB().Raw("SELECT * FROM public.categories as b WHERE b.id=$1 AND deleted_at IS NULL LIMIT 1", id).Scan(&category).Error
+	err = db.GetDB().Raw("SELECT * FROM public.categories as b WHERE b.id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&category).Error
+
+	if category.ID == uuid.Nil {
+		return category, errors.New("not found")
+	}
+
 	return category, err
 }
 

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/Massad/gin-boilerplate/db"
 	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/google/uuid"
@@ -32,6 +34,11 @@ func (m ProductModel) Create(form forms.CreateProductForm) (id uuid.UUID, err er
 // One ...
 func (m ProductModel) One(id string) (product Product, err error) {
 	err = db.GetDB().Raw("SELECT * FROM public.products as b WHERE b.id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&product).Error
+
+	if product.ID == uuid.Nil {
+		return product, errors.New("not found")
+	}
+
 	return product, err
 }
 
@@ -58,46 +65,31 @@ func (m ProductModel) Update(id string, form forms.CreateProductForm) (err error
 	// 	return err
 	// }
 
-	err = db.GetDB().Raw(`UPDATE public.products SET name=?,
+	err = db.GetDB().Exec(`UPDATE public.products SET name=?,
 		description=?,
 		origin=?,
 	    image_url=?,
 		price=?,
 		stock=?
 		WHERE id=?`,
-		id,
 		form.Name,
 		form.Description,
 		form.Origin,
 		form.ImageURL,
 		form.Price,
-		form.Stock).Error
+		form.Stock,
+		id).Error
 	// form.CateID)
 	if err != nil {
 		return err
 	}
-
-	// success, _ := operation.RowsAffected()
-
-	// if success == 0 {
-	// 	return errors.New("updated 0 records")
-	// }
 
 	return err
 }
 
 // Delete ...
 func (m ProductModel) Delete(id string) (err error) {
-
 	err = db.GetDB().Exec("UPDATE public.products SET deleted_at = CURRENT_TIMESTAMP where id=?", id).Error
-	if err != nil {
-		return err
-	}
-
-	// success, _ := operation.RowsAffected()
-	// if success == 0 {
-	// 	return errors.New("no records were deleted")
-	// }
 
 	return err
 }
