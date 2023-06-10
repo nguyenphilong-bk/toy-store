@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.11 // indirect
-	github.com/lib/pq v1.5.2
+	github.com/lib/pq v1.10.9
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/stretchr/testify v1.8.1
 	github.com/ugorji/go v1.2.6 // indirect
