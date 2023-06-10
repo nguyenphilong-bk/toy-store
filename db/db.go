@@ -1,26 +1,26 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/go-gorp/gorp"
 	_redis "github.com/go-redis/redis/v7"
 	_ "github.com/lib/pq" //import postgres
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 //DB ...
 type DB struct {
-	*sql.DB
+	*gorm.DB
 }
 
-var db *gorp.DbMap
+var db *gorm.DB
 
 //Init ...
 func Init() {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s host=db sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s host=178.128.26.24 port=5432 sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
 
 	var err error
 	db, err = ConnectDB(dbinfo)
@@ -31,23 +31,30 @@ func Init() {
 }
 
 //ConnectDB ...
-func ConnectDB(dataSourceName string) (*gorp.DbMap, error) {
-	db, err := sql.Open("postgres", dataSourceName)
+func ConnectDB(dataSourceName string) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dataSourceName, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	if err = db.Ping(); err != nil {
-		return nil, err
+	db = db.Set("gorm:auto_preload", true)
+	// if err = db.Ping(); err != nil {
+	// 	return nil, err
+	// }
+	sqldb, _ := db.DB()
+	if err := sqldb.Ping(); err != nil {
+		// mini.Log().Error().Err(err).Msg("ping failed to database")
+		// mini.Log().Debug().Msg("reconnecting to database...")
+		sqldb.Close()
+		db = nil
+		return ConnectDB(dataSourceName)
 	}
 
-	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
-	dbmap.TraceOn("[gorp]", log.New(os.Stdout, "golang-gin:", log.Lmicroseconds)) //Trace database requests
-	return dbmap, nil
+	return db, nil
 }
 
 //GetDB ...
-func GetDB() *gorp.DbMap {
+func GetDB() *gorm.DB {
 	return db
 }
 

@@ -13,14 +13,14 @@ import (
 
 // User ...
 type User struct {
-	ID        uuid.UUID `db:"id, primarykey" json:"id"`
-	Email     string    `db:"email" json:"email"`
-	Password  string    `db:"password" json:"-"`
-	Name      string    `db:"name" json:"name"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	Phone     string    `db:"phone" json:"phone"`
-	Birthday  string    `db:"birthday" json:"birthday"`
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"`
+	Name      string    `json:"name"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	Phone     string    `json:"phone"`
+	Birthday  string    `json:"birthday"`
 }
 
 // UserModel ...
@@ -31,7 +31,7 @@ var authModel = new(AuthModel)
 // Login ...
 func (m UserModel) Login(form forms.LoginForm) (user User, token Token, err error) {
 
-	err = db.GetDB().SelectOne(&user, "SELECT id, email, password, name, updated_at, created_at FROM public.users WHERE email=LOWER($1) LIMIT 1", form.Email)
+	err = db.GetDB().Raw("SELECT id, email, password, name, updated_at, created_at FROM public.users WHERE email=LOWER(?) LIMIT 1", form.Email).Scan(&user).Error
 
 	if err != nil {
 		return user, token, err
@@ -67,7 +67,8 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 	getDb := db.GetDB()
 
 	//Check if the user exists in database
-	checkUser, err := getDb.SelectInt("SELECT count(id) FROM public.users WHERE email=LOWER($1) LIMIT 1", form.Email)
+	var checkUser int
+	err = getDb.Raw("SELECT count(id) FROM public.users WHERE email=LOWER(?) LIMIT 1", form.Email).Scan(&checkUser).Error
 	if err != nil {
 		return user, errors.New("something went wrong, please try again later")
 	}
@@ -83,11 +84,14 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 	}
 
 	//Create the user and return back the user ID
-	err = getDb.QueryRow("INSERT INTO public.users(email, password, name, phone) VALUES($1, $2, $3, $4) RETURNING id ", form.Email, string(hashedPassword), form.Name, form.Phone).Scan(&user.ID)
+	
+	userID := ""
+	err = getDb.Raw("INSERT INTO public.users(email, password, name, phone) VALUES(?, ?, ?, ?) RETURNING id ", form.Email, string(hashedPassword), form.Name, form.Phone).Scan(&userID).Error
 	if err != nil {
 		return user, errors.New("something went wrong, please try again later")
 	}
 
+	user.ID = uuid.MustParse(userID)
 	user.Name = form.Name
 	user.Email = form.Email
 	user.Phone = form.Phone
@@ -97,6 +101,6 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 
 // One ...
 func (m UserModel) One(userID int64) (user User, err error) {
-	err = db.GetDB().SelectOne(&user, "SELECT id, email, name FROM public.users WHERE id=$1 LIMIT 1", userID)
+	err = db.GetDB().First(&user, userID).Error
 	return user, err
 }
