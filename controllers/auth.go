@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Massad/gin-boilerplate/common"
 	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/Massad/gin-boilerplate/models"
 	"github.com/gin-gonic/gin"
@@ -22,16 +23,10 @@ func (ctl AuthController) TokenValid(c *gin.Context) {
 	tokenAuth, err := authModel.ExtractTokenMetadata(c.Request)
 	if err != nil {
 		//Token either expired or not valid
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Please login first"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Please login first", "code": common.CODE_FAILURE, "data": nil})
 		return
 	}
 
-	// userID, err := authModel.FetchAuth(tokenAuth)
-	// if err != nil {
-	// 	//Token does not exists in Redis (User logged out or expired)
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Please login first"})
-	// 	return
-	// }
 
 	//To be called from GetUserID()
 	c.Set("userID", tokenAuth.UserID)
@@ -42,7 +37,7 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 	var tokenForm forms.Token
 
 	if c.ShouldBindJSON(&tokenForm) != nil {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "Invalid form", "form": tokenForm})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid form", "form": tokenForm, "code": common.CODE_FAILURE})
 		c.Abort()
 		return
 	}
@@ -57,12 +52,12 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 	})
 	//if there is an error, the token must have expired
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again", "code": common.CODE_FAILURE})
 		return
 	}
 	//is token valid?
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again", "code": common.CODE_FAILURE})
 		return
 	}
 	//Since token is valid, get the uuid:
@@ -88,7 +83,7 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 		//Create new pairs of refresh and access tokens
 		ts, createErr := authModel.CreateToken(userID.(string))
 		if createErr != nil {
-			c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization, please login again"})
+			c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization, please login again", "code": common.CODE_FAILURE})
 			return
 		}
 		//save the tokens metadata to redis
@@ -101,8 +96,8 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 			"access_token":  ts.AccessToken,
 			"refresh_token": ts.RefreshToken,
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Refreshed token successfully", "data": tokens})
+		c.JSON(http.StatusOK, gin.H{"message": "Refreshed token successfully", "data": tokens, "code": common.CODE_SUCCESS})
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again", "code": common.CODE_FAILURE})
 	}
 }

@@ -162,7 +162,7 @@ func TestRegisterInvalidEmail(t *testing.T) {
 	resp := httptest.NewRecorder()
 
 	testRouter.ServeHTTP(resp, req)
-	assert.Equal(t, http.StatusNotAcceptable, resp.Code)
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
 /**
@@ -247,7 +247,7 @@ func TestInvalidLogin(t *testing.T) {
 
 	testRouter.ServeHTTP(resp, req)
 
-	assert.Equal(t, http.StatusNotAcceptable, resp.Code)
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
 /**
@@ -319,7 +319,7 @@ func TestCreateInvalidArticle(t *testing.T) {
 	resp := httptest.NewRecorder()
 	testRouter.ServeHTTP(resp, req)
 
-	assert.Equal(t, http.StatusNotAcceptable, resp.Code)
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
 /**

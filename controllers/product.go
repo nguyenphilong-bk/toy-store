@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/Massad/gin-boilerplate/common"
 	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/Massad/gin-boilerplate/models"
 	"github.com/google/uuid"
@@ -22,14 +23,14 @@ func (ctrl ProductController) Create(c *gin.Context) {
 
 	if validationErr := c.ShouldBindJSON(&form); validationErr != nil {
 		message := productForm.Create(validationErr)
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": message, "data": nil, "code": common.CODE_FAILURE})
 		return
 	}
 
 	// if form.BrandID != "" {
 	// 	_, err := brandModel.One(form.BrandID)
 	// 	if err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": "Brand ID doesn't exist"})
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Brand ID doesn't exist"})
 	// 		return
 	// 	}
 	// }
@@ -37,29 +38,29 @@ func (ctrl ProductController) Create(c *gin.Context) {
 	// if form.CateID != "" {
 	// 	_, err := categoryModel.One(form.CateID)
 	// 	if err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": "Category ID doesn't exist"})
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Category ID doesn't exist"})
 	// 		return
 	// 	}
 	// }
 
 	id, err := productModel.Create(form)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": "Product could not be created"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Product could not be created", "code": common.CODE_FAILURE, "data": nil})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Product created successfully", "data": map[string]uuid.UUID{"id": id}})
+	c.JSON(http.StatusOK, gin.H{"message": "Product created successfully", "data": map[string]uuid.UUID{"id": id}, "code": common.CODE_FAILURE})
 }
 
 // All ...
 func (ctrl ProductController) All(c *gin.Context) {
 	results, err := productModel.All()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"Message": "Could not get products"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Could not get products", "code": common.CODE_FAILURE, "data": nil})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": results, "message": "Get categories successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": results, "message": "Get categories successfully", "code": common.CODE_SUCCESS})
 }
 
 // One ...
@@ -67,17 +68,17 @@ func (ctrl ProductController) One(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Invalid parameter"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid parameter", "code": common.CODE_FAILURE, "data": nil})
 		return
 	}
 
 	data, err := productModel.One(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Product not found"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found", "data": nil, "code": common.CODE_FAILURE})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": data, "message": "Get product successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": data, "message": "Get product successfully", "code": common.CODE_SUCCESS})
 }
 
 // Update ...
@@ -85,7 +86,7 @@ func (ctrl ProductController) Update(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Invalid parameter"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid parameter", "data": nil, "code": common.CODE_FAILURE})
 		return
 	}
 
@@ -93,23 +94,23 @@ func (ctrl ProductController) Update(c *gin.Context) {
 
 	if validationErr := c.ShouldBindJSON(&form); validationErr != nil {
 		message := productForm.Create(validationErr)
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": message, "data": nil, "code": common.CODE_FAILURE})
 		return
 	}
 
 	err := productModel.Update(id, form)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"Message": "Product could not be updated"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Product could not be updated", "data": nil, "code": common.CODE_FAILURE})
 		return
 	}
 
 	data, err := productModel.One(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Product not found"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Product not found", "code": common.CODE_FAILURE})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": data, "message": "Update product successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": data, "message": "Update product successfully", "code": common.CODE_SUCCESS})
 }
 
 // Delete ...
@@ -117,15 +118,15 @@ func (ctrl ProductController) Delete(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Invalid parameter"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Invalid parameter", "code": common.CODE_FAILURE})
 		return
 	}
 
 	err := productModel.Delete(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"Message": "Product could not be deleted"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Product could not be deleted", "code": common.CODE_FAILURE})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Product deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Product deleted", "code": common.CODE_SUCCESS})
 }

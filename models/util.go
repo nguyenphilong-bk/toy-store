@@ -54,3 +54,9 @@ type DataList struct {
 	Data JSONRaw `db:"data" json:"data"`
 	Meta JSONRaw `db:"meta" json:"meta"`
 }
+
+type ResponseJSON struct {
+	Code       string      `json:"code"`
+	Message    string      `json:"message"`
+	Data       interface{} `json:"data,omitempty"`
+}
