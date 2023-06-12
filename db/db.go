@@ -15,7 +15,7 @@ var db *gorm.DB
 
 // Init ...
 func Init() {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s host=178.128.26.24 port=5432 sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s host=db port=5432 sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
 
 	var err error
 	db, err = ConnectDB(dbinfo)
