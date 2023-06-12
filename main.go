@@ -106,29 +106,29 @@ func main() {
 		// Brand APIs
 		brand := new(controllers.BrandController)
 
-		v1.POST("/brand", TokenAuthMiddleware(), brand.Create)
-		v1.GET("/brands", TokenAuthMiddleware(), brand.All)
-		v1.GET("/brand/:id", TokenAuthMiddleware(), brand.One)
-		v1.PUT("/brand/:id", TokenAuthMiddleware(), brand.Update)
-		v1.DELETE("/brand/:id", TokenAuthMiddleware(), brand.Delete)
+		v1.POST("/brand", brand.Create)
+		v1.GET("/brands", brand.All)
+		v1.GET("/brand/:id", brand.One)
+		v1.PUT("/brand/:id", brand.Update)
+		v1.DELETE("/brand/:id", brand.Delete)
 
 		// Category APIs
 		category := new(controllers.CategoryController)
 
-		v1.POST("/category", TokenAuthMiddleware(), category.Create)
-		v1.GET("/categories", TokenAuthMiddleware(), category.All)
-		v1.GET("/category/:id", TokenAuthMiddleware(), category.One)
-		v1.PUT("/category/:id", TokenAuthMiddleware(), category.Update)
-		v1.DELETE("/category/:id", TokenAuthMiddleware(), category.Delete)
+		v1.POST("/category", category.Create)
+		v1.GET("/categories", category.All)
+		v1.GET("/category/:id", category.One)
+		v1.PUT("/category/:id", category.Update)
+		v1.DELETE("/category/:id", category.Delete)
 
 		// Category APIs
 		product := new(controllers.ProductController)
 
-		v1.POST("/product", TokenAuthMiddleware(), product.Create)
-		v1.GET("/products", TokenAuthMiddleware(), product.All)
-		v1.GET("/product/:id", TokenAuthMiddleware(), product.One)
-		v1.PUT("/product/:id", TokenAuthMiddleware(), product.Update)
-		v1.DELETE("/product/:id", TokenAuthMiddleware(), product.Delete)
+		v1.POST("/product", product.Create)
+		v1.GET("/products", product.All)
+		v1.GET("/product/:id", product.One)
+		v1.PUT("/product/:id", product.Update)
+		v1.DELETE("/product/:id", product.Delete)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")
