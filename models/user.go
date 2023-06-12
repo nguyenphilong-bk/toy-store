@@ -4,8 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Massad/gin-boilerplate/db"
-	"github.com/Massad/gin-boilerplate/forms"
+	"toy-store/db"
+	"toy-store/forms"
+
 	"github.com/google/uuid"
 
 	"golang.org/x/crypto/bcrypt"
@@ -55,8 +56,8 @@ func (m UserModel) Login(form forms.LoginForm) (user User, token Token, err erro
 
 	// saveErr := authModel.CreateAuth(user.ID.String(), tokenDetails)
 	// if saveErr == nil {
-		token.AccessToken = tokenDetails.AccessToken
-		token.RefreshToken = tokenDetails.RefreshToken
+	token.AccessToken = tokenDetails.AccessToken
+	token.RefreshToken = tokenDetails.RefreshToken
 	// }
 
 	return user, token, nil
@@ -96,7 +97,7 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 }
 
 // One ...
-func (m UserModel) One(userID int64) (user User, err error) {
+func (m UserModel) One(userID string) (user User, err error) {
 	err = db.GetDB().SelectOne(&user, "SELECT id, email, name FROM public.users WHERE id=$1 LIMIT 1", userID)
 	return user, err
 }

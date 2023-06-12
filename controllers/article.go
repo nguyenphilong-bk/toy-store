@@ -3,21 +3,21 @@ package controllers
 import (
 	"strconv"
 
-	"github.com/Massad/gin-boilerplate/forms"
-	"github.com/Massad/gin-boilerplate/models"
+	"toy-store/forms"
+	"toy-store/models"
 
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-//ArticleController ...
+// ArticleController ...
 type ArticleController struct{}
 
 var articleModel = new(models.ArticleModel)
 var articleForm = new(forms.ArticleForm)
 
-//Create ...
+// Create ...
 func (ctrl ArticleController) Create(c *gin.Context) {
 	userID := getUserID(c)
 
@@ -38,7 +38,7 @@ func (ctrl ArticleController) Create(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Article created", "id": id})
 }
 
-//All ...
+// All ...
 func (ctrl ArticleController) All(c *gin.Context) {
 	userID := getUserID(c)
 
@@ -51,7 +51,7 @@ func (ctrl ArticleController) All(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"results": results})
 }
 
-//One ...
+// One ...
 func (ctrl ArticleController) One(c *gin.Context) {
 	userID := getUserID(c)
 
@@ -72,7 +72,7 @@ func (ctrl ArticleController) One(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": data})
 }
 
-//Update ...
+// Update ...
 func (ctrl ArticleController) Update(c *gin.Context) {
 	userID := getUserID(c)
 
@@ -101,7 +101,7 @@ func (ctrl ArticleController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Article updated"})
 }
 
-//Delete ...
+// Delete ...
 func (ctrl ArticleController) Delete(c *gin.Context) {
 	userID := getUserID(c)
 

@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"github.com/Massad/gin-boilerplate/forms"
-	"github.com/Massad/gin-boilerplate/models"
+	"toy-store/common"
+	"toy-store/forms"
+	"toy-store/models"
 
 	"net/http"
 
@@ -27,17 +28,17 @@ func (ctrl UserController) Login(c *gin.Context) {
 
 	if validationErr := c.ShouldBindJSON(&loginForm); validationErr != nil {
 		message := userForm.Login(validationErr)
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message, "code": common.CODE_FAILURE})
 		return
 	}
 
 	_, token, err := userModel.Login(loginForm)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": "Invalid login details"})
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": "Invalid login details", "code": common.CODE_FAILURE})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged in", "data": token})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged in", "data": token, "code": common.CODE_SUCCESS})
 }
 
 // Register ...
@@ -46,17 +47,17 @@ func (ctrl UserController) Register(c *gin.Context) {
 
 	if validationErr := c.ShouldBindJSON(&registerForm); validationErr != nil {
 		message := userForm.Register(validationErr)
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message, "code": common.CODE_FAILURE})
 		return
 	}
 
 	user, err := userModel.Register(registerForm)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error(), "code": common.CODE_FAILURE})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully registered", "data": user})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully registered", "data": user, "code": common.CODE_SUCCESS})
 }
 
 // Logout ...
@@ -64,7 +65,7 @@ func (ctrl UserController) Logout(c *gin.Context) {
 
 	_, err := authModel.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "User not logged in"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "User not logged in", "code": common.CODE_FAILURE})
 		return
 	}
 
@@ -74,5 +75,5 @@ func (ctrl UserController) Logout(c *gin.Context) {
 	// 	return
 	// }
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out", "data": nil})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out", "code": common.CODE_SUCCESS})
 }

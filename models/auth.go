@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Massad/gin-boilerplate/db"
 	jwt "github.com/golang-jwt/jwt/v4"
 	uuid "github.com/google/uuid"
+	"toy-store/db"
 )
 
 // TokenDetails ...

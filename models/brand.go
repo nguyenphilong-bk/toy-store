@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/Massad/gin-boilerplate/db"
-	"github.com/Massad/gin-boilerplate/forms"
 	"github.com/google/uuid"
+	"toy-store/db"
+	"toy-store/forms"
 )
 
 // Article ...
