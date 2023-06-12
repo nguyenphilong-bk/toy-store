@@ -62,6 +62,8 @@ func (m CartModel) Detail(id string) (detailResponse CartDetailResponse, err err
 	LEFT JOIN products p ON cp.product_id = p.id 
 	where cp.cart_id = $1 AND cp.deleted_at IS NULL`, id)
 	if len(details) == 0 {
+		detailResponse.CartID = uuid.MustParse(id)
+		detailResponse.Total = 0
 		return
 	}
 
