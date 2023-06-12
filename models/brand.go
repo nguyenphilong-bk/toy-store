@@ -6,18 +6,19 @@ import (
 
 	"toy-store/db"
 	"toy-store/forms"
+
 	"github.com/google/uuid"
 )
 
 // Article ...
 type BaseModel struct {
-	CreatedAt sql.NullTime `db:"created_at" json:"created_at"`
+	ID        uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid();index" json:"id"`
+	CreatedAt sql.NullTime `json:"created_at" gorm:"default:current_timestamp"`
 	UpdatedAt sql.NullTime `db:"updated_at" json:"updated_at"`
 	DeletedAt sql.NullTime `db:"deleted_at" json:"deleted_at"`
 }
 type Brand struct {
-	ID   uuid.UUID `db:"id, primarykey" json:"id"`
-	Name string    `db:"name" json:"name"`
+	Name string    `json:"name"`
 	BaseModel
 }
 

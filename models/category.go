@@ -5,13 +5,13 @@ import (
 
 	"toy-store/db"
 	"toy-store/forms"
+
 	"github.com/google/uuid"
 )
 
 type Category struct {
-	ID          uuid.UUID `db:"id, primarykey" json:"id"`
-	Name        string    `db:"name" json:"name"`
-	Description string    `db:"description" json:"description"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
 	BaseModel
 }
 

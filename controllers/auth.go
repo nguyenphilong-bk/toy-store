@@ -64,7 +64,7 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 	//Since token is valid, get the uuid:
 	claims, ok := token.Claims.(jwt.MapClaims) //the token claims should conform to MapClaims
 	if ok && token.Valid {
-		refreshUUID, ok := claims["refresh_uuid"].(string) //convert the interface to string
+		_, ok := claims["refresh_uuid"].(string) //convert the interface to string
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
 			return
@@ -75,7 +75,7 @@ func (ctl AuthController) Refresh(c *gin.Context) {
 		// 	return
 		// }
 		//Delete the previous Refresh Token
-		_, _ = authModel.DeleteAuth(refreshUUID)
+		// _, _ = authModel.DeleteAuth(refreshUUID)
 		// if delErr != nil || deleted == 0 { //if any goes wrong
 		// 	c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid authorization, please login again"})
 		// 	return

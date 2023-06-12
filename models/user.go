@@ -2,10 +2,11 @@ package models
 
 import (
 	"errors"
-	"time"
+	"fmt"
 
 	"toy-store/db"
 	"toy-store/forms"
+
 	"github.com/google/uuid"
 
 	"golang.org/x/crypto/bcrypt"
@@ -13,14 +14,13 @@ import (
 
 // User ...
 type User struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
-	Name      string    `json:"name"`
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
-	Phone     string    `json:"phone"`
-	Birthday  string    `json:"birthday"`
+	BaseModel
+	Email    string `json:"email"`
+	Password string `json:"-"`
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Birthday string `json:"birthday"`
+	Cart     Cart   `gorm:"foreignKey:UserID" json:"cart"`
 }
 
 // UserModel ...
@@ -55,8 +55,8 @@ func (m UserModel) Login(form forms.LoginForm) (user User, token Token, err erro
 
 	// saveErr := authModel.CreateAuth(user.ID.String(), tokenDetails)
 	// if saveErr == nil {
-		token.AccessToken = tokenDetails.AccessToken
-		token.RefreshToken = tokenDetails.RefreshToken
+	token.AccessToken = tokenDetails.AccessToken
+	token.RefreshToken = tokenDetails.RefreshToken
 	// }
 
 	return user, token, nil
@@ -84,7 +84,7 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 	}
 
 	//Create the user and return back the user ID
-	
+
 	userID := ""
 	err = getDb.Raw("INSERT INTO public.users(email, password, name, phone) VALUES(?, ?, ?, ?) RETURNING id ", form.Email, string(hashedPassword), form.Name, form.Phone).Scan(&userID).Error
 	if err != nil {
@@ -100,7 +100,14 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 }
 
 // One ...
-func (m UserModel) One(userID int64) (user User, err error) {
-	err = db.GetDB().First(&user, userID).Error
+func (m UserModel) One(userID string) (user User, err error) {
+	result := db.GetDB().Raw("select * from users where id = ?", userID).Scan(&user)
+
+	err = result.Error
+	if err != nil {
+		fmt.Println(err)
+		return user, err
+	}
+
 	return user, err
 }

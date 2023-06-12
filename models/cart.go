@@ -5,14 +5,15 @@ import (
 
 	"toy-store/db"
 	"toy-store/forms"
+
 	"github.com/google/uuid"
 )
 
 // Article ...
 
 type Cart struct {
-	ID   uuid.UUID `db:"id, primarykey" json:"id"`
-	Name string    `db:"name" json:"name"`
+	UserID   uuid.UUID `gorm:"type:uuid;foreignKey:UserID" json:"user_id"`
+	Products []Product `gorm:"many2many:cart_products;" json:"products"`
 	BaseModel
 }
 
@@ -20,15 +21,30 @@ type Cart struct {
 type CartModel struct{}
 
 // Create ...
-func (m CartModel) Create(form forms.CreateCartForm) (articleID uuid.UUID, err error) {
-	var idString string
-	err = db.GetDB().Raw("INSERT INTO public.carts(name) VALUES($1) RETURNING id", form.Name).Scan(&idString).Error
-	return uuid.MustParse(idString), err
+func (m CartModel) Create(cart Cart) (Cart, error) {
+	tmp := db.GetDB().Table("carts").Create(&cart)
+
+	if tmp.Error != nil {
+		return cart, tmp.Error
+	}
+
+	return cart, nil
 }
 
 // One ...
 func (m CartModel) One(id string) (cart Cart, err error) {
 	err = db.GetDB().Raw("SELECT * FROM public.carts as b WHERE b.id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&cart).Error
+
+	if cart.ID == uuid.Nil {
+		return cart, errors.New("not found")
+	}
+
+	return cart, err
+}
+
+// One ...
+func (m CartModel) GetCartByUserID(id string) (cart Cart, err error) {
+	err = db.GetDB().Raw("SELECT * FROM public.carts as b WHERE b.user_id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&cart).Error
 
 	if cart.ID == uuid.Nil {
 		return cart, errors.New("not found")
@@ -61,7 +77,7 @@ func (m CartModel) Update(id string, form forms.CreateCartForm) (err error) {
 	// 	return err
 	// }
 
-	err = db.GetDB().Exec("UPDATE public.carts SET name=? WHERE id=?", form.Name, id).Error
+	// err = db.GetDB().Exec("UPDATE public.carts SET name=? WHERE id=?", form.UserID, id).Error
 
 	return err
 }

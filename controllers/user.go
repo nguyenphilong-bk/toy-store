@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // UserController ...
@@ -17,9 +18,9 @@ var userModel = new(models.UserModel)
 var userForm = new(forms.UserForm)
 
 // getUserID ...
-func getUserID(c *gin.Context) (userID int64) {
+func GetUserID(c *gin.Context) (userID string) {
 	//MustGet returns the value for the given key if it exists, otherwise it panics.
-	return c.MustGet("userID").(int64)
+	return c.MustGet("userID").(string)
 }
 
 // Login ...
@@ -69,11 +70,38 @@ func (ctrl UserController) Logout(c *gin.Context) {
 		return
 	}
 
-	// deleted, delErr := authModel.DeleteAuth(au.AccessUUID)
-	// if delErr != nil || deleted == 0 { //if any goes wrong
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid request"})
-	// 	return
-	// }
-
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out", "data": nil, "code": common.CODE_SUCCESS})
+}
+
+func (ctrl UserController) Me(c *gin.Context) {
+	_, err := authModel.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "User not logged in", "code": common.CODE_FAILURE})
+		return
+	}
+
+	userID := GetUserID(c)
+
+	// cartService.Create(userID, )
+	user, err := userModel.One(userID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Error when getting user information", "code": common.CODE_FAILURE})
+		return
+	}
+
+	cart, _ := cartService.GetCartByUserID(userID)
+	if cart.ID == uuid.Nil {
+		user.Cart, err = cartService.Create(userID, forms.CreateCartForm{
+			ProductIDs: []string{},
+		})
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Error when creating cart for user", "code": common.CODE_FAILURE})
+			return
+		}
+	} else {
+		user.Cart = cart
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Get user information successfully", "data": user, "code": common.CODE_SUCCESS})
 }

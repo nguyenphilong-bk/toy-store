@@ -10,6 +10,7 @@ import (
 	"toy-store/controllers"
 	"toy-store/db"
 	"toy-store/forms"
+	"toy-store/models"
 
 	"github.com/gin-contrib/gzip"
 	uuid "github.com/google/uuid"
@@ -84,6 +85,12 @@ func main() {
 	//Start PostgreSQL database
 	//Example: db.GetDB() - More info in the models folder
 	db.Init()
+	err = db.GetDB().AutoMigrate(&models.User{}, models.Cart{}, models.Product{})
+	if err != nil {
+		fmt.Println("error when migrating models")
+	}
+
+	// db.GetDB().AutoMigrate(&models.User{}, &models.Brand{}),
 
 	//Start Redis on database 1 - it's used to store the JWT but you can use it for anythig else
 	//Example: db.GetRedis().Set(KEY, VALUE, at.Sub(now)).Err()
@@ -97,6 +104,7 @@ func main() {
 		v1.POST("/user/login", user.Login)
 		v1.POST("/user/register", user.Register)
 		v1.GET("/user/logout", user.Logout)
+		v1.GET("/user/me", TokenAuthMiddleware(), user.Me)
 
 		/*** START AUTH ***/
 		auth := new(controllers.AuthController)
@@ -130,6 +138,10 @@ func main() {
 		v1.GET("/product/:id", TokenAuthMiddleware(), product.One)
 		v1.PUT("/product/:id", TokenAuthMiddleware(), product.Update)
 		v1.DELETE("/product/:id", TokenAuthMiddleware(), product.Delete)
+
+		cart := new(controllers.CartController)
+		// v1.GET("/cart/me", TokenAuthMiddleware(), cart.MyCart)
+		v1.PUT("/cart", TokenAuthMiddleware(), cart.Create)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")

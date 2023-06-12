@@ -27,22 +27,6 @@ func (ctrl ProductController) Create(c *gin.Context) {
 		return
 	}
 
-	// if form.BrandID != "" {
-	// 	_, err := brandModel.One(form.BrandID)
-	// 	if err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Brand ID doesn't exist"})
-	// 		return
-	// 	}
-	// }
-
-	// if form.CateID != "" {
-	// 	_, err := categoryModel.One(form.CateID)
-	// 	if err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Category ID doesn't exist"})
-	// 		return
-	// 	}
-	// }
-
 	id, err := productModel.Create(form)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Product could not be created", "code": common.CODE_FAILURE, "data": nil})

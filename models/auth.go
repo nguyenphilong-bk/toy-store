@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"toy-store/db"
+
 	jwt "github.com/golang-jwt/jwt/v4"
 	uuid "github.com/google/uuid"
 )
@@ -43,7 +44,7 @@ type AuthModel struct{}
 func (m AuthModel) CreateToken(userID string) (*TokenDetails, error) {
 
 	td := &TokenDetails{}
-	td.AtExpires = time.Now().Add(time.Minute * 60).Unix()
+	td.AtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
 	td.AccessUUID = uuid.New().String()
 
 	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()

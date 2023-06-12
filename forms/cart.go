@@ -11,19 +11,19 @@ type CartForm struct{}
 
 // CreateArticleForm ...
 type CreateCartForm struct {
-	Name string `form:"name" json:"name" binding:"required,min=1,max=100"`
+	ProductIDs []string `form:"product_id" json:"product_id"`
 }
 
 // Name ...
-func (f CartForm) Name(tag string, errMsg ...string) (message string) {
+func (f CartForm) UserID(tag string, errMsg ...string) (message string) {
 	switch tag {
 	case "required":
 		if len(errMsg) == 0 {
 			return "Please enter the article title"
 		}
 		return errMsg[0]
-	case "min", "max":
-		return "Title should be between 1 to 100 characters"
+	case "uuid":
+		return "User ID has to be UUID format"
 	default:
 		return "Something went wrong, please try again later"
 	}
@@ -39,8 +39,9 @@ func (b CartForm) Create(err error) string {
 		}
 
 		for _, err := range err.(validator.ValidationErrors) {
-			if err.Field() == "Name" {
-				return b.Name(err.Tag())
+			switch {
+			case err.Field() == "UserID":
+				return b.UserID(err.Tag())
 			}
 		}
 
@@ -61,8 +62,8 @@ func (b CartForm) Update(err error) string {
 		}
 
 		for _, err := range err.(validator.ValidationErrors) {
-			if err.Field() == "Name" {
-				return b.Name(err.Tag())
+			if err.Field() == "UserID" {
+				return b.UserID(err.Tag())
 			}
 		}
 

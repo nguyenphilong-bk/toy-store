@@ -5,17 +5,18 @@ import (
 
 	"toy-store/db"
 	"toy-store/forms"
+
 	"github.com/google/uuid"
 )
 
 type Product struct {
-	ID          uuid.UUID `db:"id, primarykey" json:"id"`
-	Name        string    `db:"name" json:"name"`
-	Origin      string    `db:"origin" json:"origin"`
-	Description string    `db:"description" json:"description"`
-	ImageURL    string    `db:"image_url" json:"image_url"`
-	Price       float64   `db:"price" json:"price"`
-	Stock       int       `db:"stock" json:"stock"`
+	Name        string  `json:"name"`
+	Origin      string  `json:"origin"`
+	Description string  `json:"description"`
+	ImageURL    string  `json:"image_url"`
+	Price       float64 `json:"price"`
+	Stock       int     `json:"stock"`
+	Carts       Cart    `gorm:"many2many:cart_products"`
 	BaseModel
 }
 
@@ -53,6 +54,11 @@ func (m ProductModel) All() (products []Product, err error) {
 		products = append(products, product)
 	}
 
+	return products, err
+}
+
+func (m ProductModel) List(productIDs []string) (products []Product, err error) {
+	err = db.GetDB().Where("id IN ?", productIDs).Find(&products).Error
 	return products, err
 }
 
