@@ -59,9 +59,9 @@ func (service CartService) Create(userID string, form forms.CreateCartForm) (car
 	return cart, tx.Commit().Error
 }
 
-func (service CartService) GetCartByUserID(userID string) (cart models.Cart, err error){
+func (service CartService) GetCartByUserID(userID string) (cart models.Cart, err error) {
 	cart, err = cartModel.GetCartByUserID(userID)
-	
+
 	return cart, err
 }
 
@@ -75,19 +75,20 @@ func assignCartToUser(tx *gorm.DB, cart models.Cart, user models.User) (err erro
 	return nil
 }
 
-func (service CartService) UpdateCart(userID string, productIDs []string) (cart models.Cart, err error){
+func (service CartService) UpdateCart(userID string, productIDs []string) (cart models.Cart, err error) {
 	cart, err = service.GetCartByUserID(userID)
 	if err != nil {
 		return cart, err
 	}
 
+	return
 	// cartProducts = []models.CartProduct{}
-	for _, productID := range productIDs {
-		cartProducts = append(cartProducts, models.CartProduct{
-			CartID:    cart.ID,
-			ProductID: uuid.MustParse(productID),
-		})
-	}
+	// for _, productID := range productIDs {
+	// 	cartProducts = append(cartProducts, models.CartProduct{
+	// 		CartID:    cart.ID,
+	// 		ProductID: uuid.MustParse(productID),
+	// 	})
+	// }
 
-	return cartProducts, nil
+	// return cartProducts, nil
 }

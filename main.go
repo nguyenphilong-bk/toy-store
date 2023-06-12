@@ -141,7 +141,7 @@ func main() {
 
 		cart := new(controllers.CartController)
 		// v1.GET("/cart/me", TokenAuthMiddleware(), cart.MyCart)
-		v1.PUT("/cart", TokenAuthMiddleware(), cart.Create)
+		v1.PUT("/cart", TokenAuthMiddleware(), cart.Update)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")

@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	_redis "github.com/go-redis/redis/v7"
 	_ "github.com/lib/pq" //import postgres
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -29,15 +27,7 @@ func Init() {
 
 // ConnectDB ...
 func ConnectDB(dataSourceName string) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dataSourceName, PreferSimpleProtocol: true}), &gorm.Config{Logger: logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold:             time.Second,   // Slow SQL threshold
-			// IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
-			// ParameterizedQueries:      true,          // Don't include params in the SQL log
-			Colorful:                  false,         // Disable color
-		},
-	)})
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dataSourceName, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
