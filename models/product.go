@@ -3,9 +3,10 @@ package models
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	"toy-store/db"
 	"toy-store/forms"
+
+	"github.com/google/uuid"
 )
 
 type Product struct {
@@ -92,4 +93,9 @@ func (m ProductModel) Delete(id string) (err error) {
 	}
 
 	return err
+}
+
+func (m ProductModel) List(productIDs []string) (products []Product, err error) {
+	_, err = db.GetDB().Select(&products, "SELECT * FROM public.products where deleted_at is null and id in (:IDs)", map[string]interface{}{"IDs": productIDs})
+	return products, err
 }

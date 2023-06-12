@@ -7,12 +7,13 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/gin-contrib/gzip"
-	uuid "github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"toy-store/controllers"
 	"toy-store/db"
 	"toy-store/forms"
+
+	"github.com/gin-contrib/gzip"
+	uuid "github.com/google/uuid"
+	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -96,6 +97,7 @@ func main() {
 		v1.POST("/user/login", user.Login)
 		v1.POST("/user/register", user.Register)
 		v1.GET("/user/logout", user.Logout)
+		v1.GET("/user/me", TokenAuthMiddleware(), user.Me)
 
 		/*** START AUTH ***/
 		auth := new(controllers.AuthController)

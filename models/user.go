@@ -22,6 +22,7 @@ type User struct {
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	Phone     string    `db:"phone" json:"phone"`
 	Birthday  string    `db:"birthday" json:"birthday"`
+	Cart      Cart      `json:"cart"`
 }
 
 // UserModel ...
@@ -98,6 +99,6 @@ func (m UserModel) Register(form forms.RegisterForm) (user User, err error) {
 
 // One ...
 func (m UserModel) One(userID string) (user User, err error) {
-	err = db.GetDB().SelectOne(&user, "SELECT id, email, name FROM public.users WHERE id=$1 LIMIT 1", userID)
+	err = db.GetDB().SelectOne(&user, "SELECT id, name, email, phone FROM public.users WHERE id=$1 LIMIT 1", userID)
 	return user, err
 }
