@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"toy-store/db"
 	"toy-store/forms"
 
@@ -14,6 +15,29 @@ type Cart struct {
 	Products []Product `json:"products"`
 	ID       uuid.UUID `db:"id, primarykey" json:"id"`
 	BaseModel
+}
+
+type CartDetail struct {
+	CartID        uuid.UUID `json:"cart_id" db:"cart_id"`
+	ProductID     uuid.UUID `json:"product_id" db:"product_id"`
+	OrderQuantity int       `json:"order_quantity" db:"order_quantity"`
+	Price         float64   `json:"price"`
+	Name          string    `json:"name"`
+	Origin        string    `json:"origin"`
+}
+
+type ProductItem struct {
+	ProductID     uuid.UUID `json:"product_id"`
+	Price         float64   `json:"price"`
+	Name          string    `json:"name"`
+	Origin        string    `json:"origin"`
+	OrderQuantity int       `json:"order_quantity"`
+}
+
+type CartDetailResponse struct {
+	CartID   uuid.UUID     `json:"cart_id"`
+	Total    float64       `json:"total"`
+	Products []ProductItem `json:"products"`
 }
 
 // ArticleModel ...
@@ -31,19 +55,42 @@ func (m CartModel) Create(userID string) (cartID string, err error) {
 }
 
 // One ...
-func (m CartModel) One(id string) (cart Cart, err error) {
-	// err = db.GetDB().Raw("SELECT * FROM public.carts as b WHERE b.id=? AND deleted_at IS NULL LIMIT 1", id).Scan(&cart).Error
+func (m CartModel) Detail(id string) (detailResponse CartDetailResponse, err error) {
+	details := []CartDetail{}
+	_, err = db.GetDB().Select(&details, `select cp.cart_id, cp.product_id, cp.order_quantity, p.price, p."name", p.origin 
+	FROM cart_products cp
+	LEFT JOIN products p ON cp.product_id = p.id 
+	where cp.cart_id = $1 AND cp.deleted_at IS NULL`, id)
+	if len(details) == 0 {
+		return
+	}
 
-	// if cart.ID == uuid.Nil {
-	// 	return cart, errors.New("not found")
-	// }
-
-	return cart, err
+	detailResponse.CartID = details[0].CartID
+	hash := map[uuid.UUID]int{}
+	total := 0.
+	for _, detail := range details {
+		_, ok := hash[detail.ProductID]
+		if !ok {
+			detailResponse.Products = append(detailResponse.Products, ProductItem{
+				ProductID:     detail.ProductID,
+				Price:         detail.Price,
+				Name:          detail.Name,
+				Origin:        detail.Origin,
+				OrderQuantity: detail.OrderQuantity,
+			})
+			hash[detail.ProductID] = len(detailResponse.Products) - 1
+		} else {
+			detailResponse.Products[hash[detail.ProductID]].OrderQuantity += detail.OrderQuantity
+		}
+		total += detail.Price * float64(detail.OrderQuantity)
+	}
+	detailResponse.Total = total
+	return detailResponse, err
 }
 
 // One ...
 func (m CartModel) GetCartByUserID(userID string) (cart Cart, err error) {
-	err = db.GetDB().SelectOne(&cart, "SELECT * FROM public.carts WHERE user_id = $1 and deleted_at IS NULL", userID)
+	err = db.GetDB().SelectOne(&cart, "SELECT id, user_id, created_at, updated_at, deleted_at FROM public.carts WHERE user_id = $1 and deleted_at IS NULL", userID)
 
 	return cart, err
 }
@@ -79,10 +126,15 @@ func (m CartModel) Update(id string, form forms.CreateCartForm) (err error) {
 
 // Delete ...
 func (m CartModel) Delete(id string) (err error) {
-	// err = db.GetDB().Exec("UPDATE public.carts SET deleted_at = CURRENT_TIMESTAMP where id=?", id).Error
-	// if err != nil {
-	// 	return err
-	// }
+	operation, err := db.GetDB().Exec(" FROM public.cart_products WHERE id=$1", id)
+	if err != nil {
+		return err
+	}
+
+	success, _ := operation.RowsAffected()
+	if success == 0 {
+		return errors.New("no records were deleted")
+	}
 
 	return err
 }

@@ -131,6 +131,15 @@ func main() {
 		v1.GET("/product/:id", product.One)
 		v1.PUT("/product/:id", product.Update)
 		v1.DELETE("/product/:id", product.Delete)
+
+		// Cart APIs
+		cart := new(controllers.CartController)
+
+		// v1.POST("/product", product.Create)
+		// v1.GET("/products", product.All)
+		// v1.GET("/product/:id", product.One)
+		v1.PUT("/cart/me", TokenAuthMiddleware(), cart.Update)
+		// v1.DELETE("/product/:id", product.Delete)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")

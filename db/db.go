@@ -11,16 +11,16 @@ import (
 	_ "github.com/lib/pq" //import postgres
 )
 
-//DB ...
+// DB ...
 type DB struct {
 	*sql.DB
 }
 
 var db *gorp.DbMap
 
-//Init ...
+// Init ...
 func Init() {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s host=db sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s host=178.128.26.24 sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
 
 	var err error
 	db, err = ConnectDB(dbinfo)
@@ -30,7 +30,7 @@ func Init() {
 
 }
 
-//ConnectDB ...
+// ConnectDB ...
 func ConnectDB(dataSourceName string) (*gorp.DbMap, error) {
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
@@ -46,15 +46,15 @@ func ConnectDB(dataSourceName string) (*gorp.DbMap, error) {
 	return dbmap, nil
 }
 
-//GetDB ...
+// GetDB ...
 func GetDB() *gorp.DbMap {
 	return db
 }
 
-//RedisClient ...
+// RedisClient ...
 var RedisClient *_redis.Client
 
-//InitRedis ...
+// InitRedis ...
 func InitRedis(selectDB ...int) {
 
 	var redisHost = os.Getenv("REDIS_HOST")
@@ -78,7 +78,7 @@ func InitRedis(selectDB ...int) {
 
 }
 
-//GetRedis ...
+// GetRedis ...
 func GetRedis() *_redis.Client {
 	return RedisClient
 }

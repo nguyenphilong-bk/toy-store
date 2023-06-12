@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"toy-store/common"
 	"toy-store/forms"
 	"toy-store/models"
@@ -106,7 +107,10 @@ func (ctrl UserController) Me(c *gin.Context) {
 		cart.ID = uuid.MustParse(cartID)
 	}
 
-	user.Cart = cart
+	user.Cart, err = cartModel.Detail(cart.ID.String())
+	if err != nil {
+		fmt.Println("error when getting cart detail")
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Get user information successfully", "data": user, "code": common.CODE_SUCCESS})
 }

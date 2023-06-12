@@ -2,10 +2,12 @@ package models
 
 import (
 	"errors"
+	"fmt"
 
 	"toy-store/db"
 	"toy-store/forms"
 
+	"github.com/go-gorp/gorp"
 	"github.com/google/uuid"
 )
 
@@ -98,4 +100,27 @@ func (m ProductModel) Delete(id string) (err error) {
 func (m ProductModel) List(productIDs []string) (products []Product, err error) {
 	_, err = db.GetDB().Select(&products, "SELECT * FROM public.products where deleted_at is null and id in (:IDs)", map[string]interface{}{"IDs": productIDs})
 	return products, err
+}
+
+func (m ProductModel) UpdateStock(tx *gorp.Transaction, form []forms.CartProductItem) (err error) {
+	for _, product := range form {
+		// checking out of stock
+		dbProduct, _ := m.One(product.ProductID)
+		if dbProduct.Stock < product.OrderQuantity {
+			return fmt.Errorf("Product %v with id %v is out of stock", dbProduct.Name, dbProduct.ID.String())
+		}
+
+		// Update stock
+		_, err := tx.Exec(`UPDATE public.products SET stock = stock - $1
+		WHERE id=$2`,
+			product.OrderQuantity,
+			product.ProductID,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

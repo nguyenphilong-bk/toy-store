@@ -10,8 +10,13 @@ import (
 type CartForm struct{}
 
 // CreateArticleForm ...
+type CartProductItem struct {
+	ProductID     string `json:"product_id"`
+	OrderQuantity int    `json:"order_quantity"`
+}
+
 type CreateCartForm struct {
-	ProductIDs []string `form:"product_id" json:"product_id"`
+	Products []CartProductItem `form:"products" json:"products"`
 }
 
 // Name ...

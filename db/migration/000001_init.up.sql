@@ -109,6 +109,7 @@ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
     cart_id uuid NOT NULL,
     product_id uuid NOT NULL,
+    order_quantity integer DEFAULT 0,
     CONSTRAINT fk_cart_product_cart_id FOREIGN KEY(cart_id) REFERENCES carts(id),
     CONSTRAINT fk_cart_product_product_id FOREIGN KEY(product_id) REFERENCES products(id)
 );
