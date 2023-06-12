@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/google/uuid"
 	"toy-store/common"
 	"toy-store/forms"
 	"toy-store/models"
+
+	"github.com/google/uuid"
 
 	"net/http"
 
@@ -33,7 +34,7 @@ func (ctrl CategoryController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Category created successfully", "data": map[string]uuid.UUID{"id": id}, "code": common.CODE_FAILURE})
+	c.JSON(http.StatusOK, gin.H{"message": "Category created successfully", "data": map[string]uuid.UUID{"id": id}, "code": common.CODE_SUCCESS})
 }
 
 // All ...
@@ -44,7 +45,7 @@ func (ctrl CategoryController) All(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": results, "message": "Get categories successfully", "code": common.CODE_FAILURE})
+	c.JSON(http.StatusOK, gin.H{"data": results, "message": "Get categories successfully", "code": common.CODE_SUCCESS})
 }
 
 // One ...
