@@ -168,8 +168,8 @@ func main() {
 			CERT string
 			KEY  string
 		}{
-			CERT: "./cert/myCA.cer",
-			KEY:  "./cert/myCA.key",
+			CERT: "./myCA.cer",
+			KEY:  "./myCA.key",
 		}
 
 		r.RunTLS(":"+port, SSLKeys.CERT, SSLKeys.KEY)
