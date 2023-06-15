@@ -51,9 +51,9 @@ func (m ProductModel) One(id string) (product Product, err error) {
 
 // All ...
 func (m ProductModel) All(categoryID, brandID string) (products []ProductDetail, err error) {
-	query := `select p.id, p.name, p.origin, p.description, p.image_url, p.price, p.stock, p.material, p.size, p.barcode,
+	query := `select p.id, p.name, p.origin, p.description, p.image_url, p.price, p.stock, COALESCE(p.material, '') material, COALESCE(p.size,'') size, COALESCE(p.barcode,'') barcode,
 				c.name category_name, c.id category_id,
-				b.name as brand_name, b.id brand_id
+				b.name brand_name, b.id brand_id
 				from products p 
 				left join product_brands pb on p.id = pb.product_id 
 				left join brands b on pb.brand_id = b.id 
