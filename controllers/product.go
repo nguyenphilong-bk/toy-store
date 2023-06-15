@@ -55,7 +55,10 @@ func (ctrl ProductController) Create(c *gin.Context) {
 
 // All ...
 func (ctrl ProductController) All(c *gin.Context) {
-	results, err := productModel.All()
+	categoryID := c.Query("category_id")
+	brandID := c.Query("brand_id")
+
+	results, err := productModel.All(categoryID, brandID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"Message": "Could not get products", "code": common.CODE_FAILURE, "data": nil})
 		return
