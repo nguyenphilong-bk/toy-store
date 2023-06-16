@@ -27,10 +27,10 @@ type Product struct {
 
 type ProductDetail struct {
 	Product
-	CategoryName string `db:"category_name"`
-	CategoryID   string `db:"category_id"`
-	BrandName    string `db:"brand_name"`
-	BrandID      string `db:"brand_id"`
+	CategoryName string `db:"category_name" json:"category_name"`
+	CategoryID   string `db:"category_id" json:"category_id"`
+	BrandName    string `db:"brand_name" json:"brand_name"`
+	BrandID      string `db:"brand_id" json:"brand_id"`
 }
 
 // ArticleModel ...
@@ -51,9 +51,9 @@ func (m ProductModel) One(id string) (product Product, err error) {
 
 // All ...
 func (m ProductModel) All(categoryID, brandID string) (products []ProductDetail, err error) {
-	query := `select p.id, p.name, p.origin, p.description, p.image_url, p.price, p.stock, p.material, p.size, p.barcode,
-				c.name category_name, c.id category_id,
-				b.name as brand_name, b.id brand_id
+	query := `select p.id, p.name, p.origin, p.description, p.image_url, p.price, p.stock, COALESCE(p.material, '') material, COALESCE(p.size,'') size, COALESCE(p.barcode,'') barcode,
+				COALESCE(c.name, '') category_name, COALESCE(c.id, '00000000-0000-0000-0000-000000000000') category_id,
+				COALESCE(b.name, '') brand_name, COALESCE(b.id, '00000000-0000-0000-0000-000000000000') brand_id
 				from products p 
 				left join product_brands pb on p.id = pb.product_id 
 				left join brands b on pb.brand_id = b.id 
