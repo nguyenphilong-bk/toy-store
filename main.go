@@ -139,7 +139,7 @@ func main() {
 		// v1.GET("/products", product.All)
 		// v1.GET("/product/:id", product.One)
 		v1.PUT("/cart/me", TokenAuthMiddleware(), cart.Update)
-		v1.DELETE("/cart/me/item/:id", TokenAuthMiddleware(), cart.DeleteItem)
+		v1.DELETE("/cart/me/product/:id", TokenAuthMiddleware(), cart.DeleteItem)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")
