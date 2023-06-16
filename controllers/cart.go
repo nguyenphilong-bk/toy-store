@@ -89,3 +89,40 @@ func (ctrl CartController) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "cart created successfully", "data": cartInfo, "code": common.CODE_SUCCESS})
 }
+
+func (ctrl CartController) DeleteItem(c *gin.Context) {
+	itemID := c.Param("id")
+	userID := getUserID(c)
+
+	cart, err := cartModel.GetCartByUserID(userID)
+	fmt.Println("error when getting cart info:", err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+		return
+	}
+
+	tx, err := db.GetDB().Begin()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+	}
+
+	// Create cart products record
+	err = cartProductModel.DeleteItem(tx, cart.ID.String(), itemID)
+	if err != nil {
+		fmt.Println("error when deleting old cart products of id: " + cart.ID.String() + err.Error())
+		tx.Rollback()
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+		return
+	}
+
+	tx.Commit()
+
+	cartInfo, err := cartModel.Detail(cart.ID.String())
+	if err != nil {
+		fmt.Println("error when getting cart detail info", err.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "cart created successfully", "data": cartInfo, "code": common.CODE_SUCCESS})
+}
