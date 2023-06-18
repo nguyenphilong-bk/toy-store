@@ -89,6 +89,6 @@ func (ctrl OrderController) Checkout(c *gin.Context) {
 		return
 	}
 
-	orderInfo.RedirectURL = "http://example-redirect-url.com"
+	orderInfo.RedirectURL = "https://buy.stripe.com/test_28o9Dnfz63Q3cda5kn"
 	c.JSON(http.StatusOK, gin.H{"message": "order created successfully", "data": orderInfo, "code": common.CODE_SUCCESS})
 }
