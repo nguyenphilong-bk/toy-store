@@ -68,8 +68,14 @@ func (m CartProductModel) BatchCreate(tx *gorp.Transaction, cartID string, form 
 // }
 
 // Update ...
-func (m CartProductModel) Delete(tx *gorp.Transaction, cart_id string) (err error) {
-	_, err = tx.Exec("UPDATE public.cart_products SET deleted_at = current_timestamp WHERE cart_id = $1", cart_id)
+func (m CartProductModel) Delete(tx *gorp.Transaction, cartID string) (err error) {
+	_, err = tx.Exec("UPDATE public.cart_products SET deleted_at = current_timestamp WHERE cart_id = $1", cartID)
+
+	return err
+}
+
+func (m CartProductModel) DeleteItem(tx *gorp.Transaction, cartID, productID string) (err error) {
+	_, err = tx.Exec("UPDATE public.cart_products SET deleted_at = current_timestamp WHERE cart_id = $1 and product_id = $2", cartID, productID)
 
 	return err
 }
