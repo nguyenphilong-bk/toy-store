@@ -17,7 +17,7 @@ type Order struct {
 }
 
 type OrderDetail struct {
-	OrderID        uuid.UUID `json:"order_id" db:"order_id"`
+	OrderID       uuid.UUID `json:"order_id" db:"order_id"`
 	ProductID     uuid.UUID `json:"product_id" db:"product_id"`
 	OrderQuantity int       `json:"order_quantity" db:"order_quantity"`
 	Price         float64   `json:"price"`
@@ -27,9 +27,10 @@ type OrderDetail struct {
 }
 
 type OrderDetailResponse struct {
-	OrderID   uuid.UUID     `json:"order_id"`
-	Total    float64       `json:"total"`
-	Products []ProductItem `json:"products"`
+	OrderID     uuid.UUID     `json:"order_id"`
+	Total       float64       `json:"total"`
+	Products    []ProductItem `json:"products"`
+	RedirectURL string        `json:"redirect_url,omitempty"`
 }
 
 // ArticleModel ...

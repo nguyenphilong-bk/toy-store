@@ -36,6 +36,16 @@ func (ctrl OrderController) Checkout(c *gin.Context) {
 	}
 
 	cartInfo, err := cartModel.Detail(cart.ID.String())
+	if err != nil {
+		fmt.Println("error when getting cart detail")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+		return
+	}
+
+	if len(cartInfo.Products) == 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "can not create an empty order", "code": common.CODE_FAILURE, "data": nil})
+		return
+	}
 
 	tx, err := db.GetDB().Begin()
 	if err != nil {
@@ -79,5 +89,6 @@ func (ctrl OrderController) Checkout(c *gin.Context) {
 		return
 	}
 
+	orderInfo.RedirectURL = "http://example-redirect-url.com"
 	c.JSON(http.StatusOK, gin.H{"message": "order created successfully", "data": orderInfo, "code": common.CODE_SUCCESS})
 }
