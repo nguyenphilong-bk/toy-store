@@ -140,6 +140,10 @@ func main() {
 		// v1.GET("/product/:id", product.One)
 		v1.PUT("/cart/me", TokenAuthMiddleware(), cart.Update)
 		// v1.DELETE("/product/:id", product.Delete)
+
+		// Order APIs
+		order := new(controllers.OrderController)
+		v1.POST("/orders", TokenAuthMiddleware(), order.Checkout)
 	}
 
 	r.LoadHTMLGlob("./public/html/*")

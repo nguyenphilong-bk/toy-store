@@ -39,6 +39,7 @@ func (ctrl CartController) Update(c *gin.Context) {
 	tx, err := db.GetDB().Begin()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+		return
 	}
 
 	// TODO: Return stock

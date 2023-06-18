@@ -1,10 +1,10 @@
 package models
 
 import (
-	"errors"
 	"toy-store/db"
 	"toy-store/forms"
 
+	"github.com/go-gorp/gorp"
 	"github.com/google/uuid"
 )
 
@@ -130,16 +130,8 @@ func (m CartModel) Update(id string, form forms.CreateCartForm) (err error) {
 }
 
 // Delete ...
-func (m CartModel) Delete(id string) (err error) {
-	operation, err := db.GetDB().Exec(" FROM public.cart_products WHERE id=$1", id)
-	if err != nil {
-		return err
-	}
-
-	success, _ := operation.RowsAffected()
-	if success == 0 {
-		return errors.New("no records were deleted")
-	}
+func (m CartModel) Delete(tx *gorp.Transaction, id string) (err error) {
+	_, err = tx.Exec("UPDATE public.carts SET deleted_at = current_timestamp WHERE id = $1", id)
 
 	return err
 }
