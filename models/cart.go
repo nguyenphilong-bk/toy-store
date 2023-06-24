@@ -25,6 +25,7 @@ type CartDetail struct {
 	Name          string    `json:"name"`
 	Origin        string    `json:"origin"`
 	ImageUrl      string    `json:"image_url" db:"image_url"`
+	PriceID       string    `json:"price_id" db:"price_id"`
 }
 
 type ProductItem struct {
@@ -34,6 +35,7 @@ type ProductItem struct {
 	Origin        string    `json:"origin"`
 	OrderQuantity int       `json:"order_quantity"`
 	ImageUrl      string    `json:"image_url"`
+	PriceID       string    `json:"price_id"`
 }
 
 type CartDetailResponse struct {
@@ -59,7 +61,7 @@ func (m CartModel) Create(userID string) (cartID string, err error) {
 // One ...
 func (m CartModel) Detail(id string) (detailResponse CartDetailResponse, err error) {
 	details := []CartDetail{}
-	_, err = db.GetDB().Select(&details, `select cp.cart_id, cp.product_id, cp.order_quantity, p.price, p."name", p.origin, p.image_url 
+	_, err = db.GetDB().Select(&details, `select cp.cart_id, cp.product_id, cp.order_quantity, p.price, p."name", p.origin, p.image_url, p.price_id 
 	FROM cart_products cp
 	LEFT JOIN products p ON cp.product_id = p.id 
 	where cp.cart_id = $1 AND cp.deleted_at IS NULL`, id)
@@ -82,6 +84,7 @@ func (m CartModel) Detail(id string) (detailResponse CartDetailResponse, err err
 				Origin:        detail.Origin,
 				OrderQuantity: detail.OrderQuantity,
 				ImageUrl:      detail.ImageUrl,
+				PriceID:       detail.PriceID,
 			})
 			hash[detail.ProductID] = len(detailResponse.Products) - 1
 		} else {

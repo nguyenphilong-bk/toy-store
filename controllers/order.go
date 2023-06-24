@@ -9,6 +9,8 @@ import (
 	"toy-store/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/paymentlink"
 )
 
 // OrderController ...
@@ -78,7 +80,6 @@ func (ctrl OrderController) Checkout(c *gin.Context) {
 	}
 
 	tx.Commit()
-
 	// Create a new cart for this user
 	cartModel.Create(userID)
 
@@ -89,6 +90,26 @@ func (ctrl OrderController) Checkout(c *gin.Context) {
 		return
 	}
 
-	orderInfo.RedirectURL = "https://buy.stripe.com/test_28o9Dnfz63Q3cda5kn"
+	stripe.Key = "sk_test_51NJoAyJMmu3hPzAnsD4qqRPrhfHnNRXhaHgy61vuaREm0HD01y9mmA814anJLCm9j8b6hST37km58dcLgvciUknx00gdb65iSW"
+	lineItems := []*stripe.PaymentLinkLineItemParams{}
+	for _, product := range orderInfo.Products {
+		lineItems = append(lineItems, &stripe.PaymentLinkLineItemParams{
+			Price:    stripe.String(product.PriceID),
+			Quantity: stripe.Int64(int64(product.OrderQuantity)),
+		})
+	}
+	params := &stripe.PaymentLinkParams{
+		LineItems: lineItems,
+	}
+	result, err := paymentlink.New(params)
+	if err != nil {
+		fmt.Println("error when create payment link")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
+		return
+	}
+	fmt.Println(result)
+
+
+	orderInfo.RedirectURL = result.URL
 	c.JSON(http.StatusOK, gin.H{"message": "order created successfully", "data": orderInfo, "code": common.CODE_SUCCESS})
 }

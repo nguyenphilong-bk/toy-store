@@ -22,6 +22,7 @@ type Product struct {
 	Material    string    `db:"material" json:"material"`
 	Size        string    `db:"size" json:"size"`
 	Barcode     string    `db:"barcode" json:"barcode"`
+	PriceID     string    `db:"price_id" json:"price_id"`
 	BaseModel
 }
 

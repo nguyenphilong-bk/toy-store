@@ -24,6 +24,7 @@ type OrderDetail struct {
 	Name          string    `json:"name"`
 	Origin        string    `json:"origin"`
 	ImageUrl      string    `json:"image_url" db:"image_url"`
+	PriceID       string    `json:"price_id" db:"price_id"`
 }
 
 type OrderDetailResponse struct {
@@ -50,7 +51,7 @@ func (m OrderModel) Create(userID string, total float64, address string) (orderI
 // One ...
 func (m OrderModel) Detail(id string) (detailResponse OrderDetailResponse, err error) {
 	details := []OrderDetail{}
-	_, err = db.GetDB().Select(&details, `select po.order_id, po.product_id, po.order_quantity, po.price, p."name", p.origin, p.image_url 
+	_, err = db.GetDB().Select(&details, `select po.order_id, po.product_id, po.order_quantity, po.price, p."name", p.origin, p.image_url, p.price_id
 	FROM product_orders po
 	LEFT JOIN products p ON po.product_id = p.id 
 	where po.order_id = $1 AND po.deleted_at IS NULL`, id)
@@ -73,6 +74,7 @@ func (m OrderModel) Detail(id string) (detailResponse OrderDetailResponse, err e
 				Origin:        detail.Origin,
 				OrderQuantity: detail.OrderQuantity,
 				ImageUrl:      detail.ImageUrl,
+				PriceID:       detail.PriceID,
 			})
 			hash[detail.ProductID] = len(detailResponse.Products) - 1
 		} else {
