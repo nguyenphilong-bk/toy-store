@@ -48,6 +48,19 @@ func (m OrderModel) Create(userID string, total float64, address string) (orderI
 	return orderID, nil
 }
 
+// Create ...
+func (m OrderModel) AttachPaymentURL(id, paymentURL string) (err error) {
+	_, err = db.GetDB().Exec("UPDATE public.orders SET payment_url = $1 WHERE id = $2", paymentURL, id)
+
+	return err
+}
+
+func (m OrderModel) UpdateStatus(paymentURL, status string) (err error) {
+	_, err = db.GetDB().Exec("UPDATE public.orders SET status = $1 WHERE payment_url = $2", status, paymentURL)
+
+	return err
+}
+
 // One ...
 func (m OrderModel) Detail(id string) (detailResponse OrderDetailResponse, err error) {
 	details := []OrderDetail{}

@@ -107,8 +107,7 @@ func (ctrl OrderController) Checkout(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "code": common.CODE_FAILURE, "data": nil})
 		return
 	}
-	fmt.Println(result)
-
+	orderModel.AttachPaymentURL(orderID, result.URL)
 
 	orderInfo.RedirectURL = result.URL
 	c.JSON(http.StatusOK, gin.H{"message": "order created successfully", "data": orderInfo, "code": common.CODE_SUCCESS})

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -11,10 +12,13 @@ import (
 	"toy-store/controllers"
 	"toy-store/db"
 	"toy-store/forms"
+	"toy-store/models"
 
 	"github.com/gin-contrib/gzip"
 	uuid "github.com/google/uuid"
 	"github.com/joho/godotenv"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/paymentlink"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -89,7 +93,7 @@ func main() {
 	//Start Redis on database 1 - it's used to store the JWT but you can use it for anythig else
 	//Example: db.GetRedis().Set(KEY, VALUE, at.Sub(now)).Err()
 	// db.InitRedis(1)
-	
+
 	v1 := r.Group("/v1")
 	{
 		/*** START USER ***/
@@ -188,33 +192,50 @@ func main() {
 }
 
 func handleWebhook(c *gin.Context) {
-	b, _ := json.MarshalIndent(c, "", "    ")
-//   const MaxBodyBytes = int64(65536)
-//   c.Request.Body = http.MaxBytesReader(w, c.Request.Body, MaxBodyBytes)
-//   payload, err := ioutil.ReadAll(req.Body)
-//   if err != nil {
-//     fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
-//     w.WriteHeader(http.StatusServiceUnavailable)
-//     return
-//   }
-	fmt.Println(string(b))
-	c.JSON(200, gin.H{"Done": "done"})
+	w, req := c.Writer, c.Request
+	// w http.ResponseWriter, req *http.Request
+	const MaxBodyBytes = int64(65536)
+	req.Body = http.MaxBytesReader(w, req.Body, MaxBodyBytes)
+	payload, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
 
-//   // This is your Stripe CLI webhook secret for testing your endpoint locally.
-//   endpointSecret := "whsec_9e6a4108e9aa242ddd59e54932317774e97bf20d623aa66677bdf3b3c538f41e";
-//   // Pass the request body and Stripe-Signature header to ConstructEvent, along
-//   // with the webhook signing key.
-//   event, err := webhook.ConstructEvent(payload, req.Header.Get("Stripe-Signature"),
-//     endpointSecret)
+	event := stripe.Event{}
 
-//   if err != nil {
-//     fmt.Fprintf(os.Stderr, "Error verifying webhook signature: %v\n", err)
-//     w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
-//     return
-//   }
+	if err := json.Unmarshal(payload, &event); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Webhook error while parsing basic request. %v\n", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-//   // Unmarshal the event data into an appropriate struct depending on its Type
-//   fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+	switch event.Type {
+	case "checkout.session.completed":
 
-//   w.WriteHeader(http.StatusOK)
+		type Payment struct {
+			PaymentLink string `json:"payment_link"`
+		}
+		var payment Payment
+		err := json.Unmarshal(event.Data.Raw, &payment)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		stripe.Key = "sk_test_51NJoAyJMmu3hPzAnsD4qqRPrhfHnNRXhaHgy61vuaREm0HD01y9mmA814anJLCm9j8b6hST37km58dcLgvciUknx00gdb65iSW"
+		// paymentlink.Client()
+		params := &stripe.PaymentLinkParams{}
+		// paymentLink, err := paymentlink.New(params)
+		pl, _ := paymentlink.Get(payment.PaymentLink, params)
+		
+		orderModel := new(models.OrderModel)
+		orderModel.UpdateStatus(pl.URL, "completed")
+
+	default:
+		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
