@@ -45,8 +45,11 @@ func (m ProductModel) Create(form forms.CreateProductForm) (id uuid.UUID, err er
 }
 
 // One ...
-func (m ProductModel) One(id string) (product Product, err error) {
-	err = db.GetDB().SelectOne(&product, "SELECT * FROM public.products as b WHERE b.id=$1 AND deleted_at IS NULL LIMIT 1", id)
+func (m ProductModel) One(id string) (product ProductDetail, err error) {
+	err = db.GetDB().SelectOne(&product, `
+	SELECT p.id, p.name, p.origin, p.description, p.image_url, p.price, p.stock, COALESCE(p.material, '') material, COALESCE(p.size,'') size, COALESCE(p.barcode,'') barcode,
+				COALESCE(c.name, '') category_name, COALESCE(c.id, '00000000-0000-0000-0000-000000000000') category_id,
+				COALESCE(b.name, '') brand_name, COALESCE(b.id, '00000000-0000-0000-0000-000000000000') brand_id FROM public.products p LEFT JOIN public.product_brands pb on p.id = pb.product_id LEFT JOIN public.brands b ON pb.brand_id = b.id LEFT JOIN public.product_categories pc ON p.id = pc.product_id LEFT JOIN public.categories c ON c.id = pc.category_id WHERE p.id=$1 AND p.deleted_at IS NULL LIMIT 1`, id)
 	return product, err
 }
 
