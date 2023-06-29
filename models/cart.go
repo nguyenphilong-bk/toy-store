@@ -61,7 +61,7 @@ func (m CartModel) Create(userID string) (cartID string, err error) {
 // One ...
 func (m CartModel) Detail(id string) (detailResponse CartDetailResponse, err error) {
 	details := []CartDetail{}
-	_, err = db.GetDB().Select(&details, `select cp.cart_id, cp.product_id, cp.order_quantity, p.price, p."name", p.origin, p.image_url, p.price_id 
+	_, _ = db.GetDB().Select(&details, `select cp.cart_id, cp.product_id, cp.order_quantity, p.price, p."name", p.origin, p.image_url, p.price_id 
 	FROM cart_products cp
 	LEFT JOIN products p ON cp.product_id = p.id 
 	where cp.cart_id = $1 AND cp.deleted_at IS NULL`, id)
